@@ -79,27 +79,27 @@ create_ansible_environment() {
 
 prepare_ssh_key() {
     # Skip preparing ssh resources if ~/.ssh directory is already existed.
-    [ -d "~/.ssh" ] && return 0
+    if [ ! -d ~/.ssh ]; then
+        mkdir ~/.ssh
 
-    mkdir ~/.ssh
+        [[ ! -f "/private-key" ]] && {
+            log_err "private-key file does not existed"
+            return 1
+        }
 
-    [[ ! -f "/private-key" ]] && {
-        log_err "private-key file does not existed"
-        return 1
-    }
+        cp /private-key ~/.ssh/private-key || {
+            log_err "Failed to copy /private-key to user's ssh config directory"
+            return 1
+        }
 
-    cp /private-key ~/.ssh/private-key || {
-        log_err "Failed to copy /private-key to user's ssh config directory"
-        return 1
-    }
-
-    cat << EOF > ~/.ssh/config
+        cat << EOF > ~/.ssh/config
 Host *
     ServerAliveInterval 120
     PreferredAuthentications publickey,password,gssapi-with-mic,hostbased,keyboard-interactive
     User root
     IdentityFile ~/.ssh/private-key
 EOF
+    fi
 
     chmod 700 ~/.ssh
     chmod -R 600 ~/.ssh/*
