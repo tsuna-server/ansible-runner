@@ -78,6 +78,9 @@ create_ansible_environment() {
 }
 
 prepare_ssh_key() {
+    # Skip preparing ssh resources if ~/.ssh directory is already existed.
+    [ -d "~/.ssh" ] && return 0
+
     mkdir ~/.ssh
 
     [[ ! -f "/private-key" ]] && {
