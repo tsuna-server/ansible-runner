@@ -106,7 +106,7 @@ EOF
 }
 
 venv_has_already_prepared() {
-    [ ! -f "${PYTHON_VIRTUALENV_DIRECTORY}" ] && return 1
+    [ ! -d "${PYTHON_VIRTUALENV_DIRECTORY}" ] && return 1
     return 0
 }
 
