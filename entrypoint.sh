@@ -13,10 +13,14 @@ REQUIREMENTS_TXT_PATH="${REQUIREMENTS_TXT_PATH:-requirements.txt}"
 REQUIREMENTS_YML_PATH="${REQUIREMENTS_YML_PATH:-requirements.yml}"
 
 FONT_COLOR_RED='\033[0;31m'
+FONT_COLOR_GREEN='\033[0;32m'
 FONT_COLOR_END='\033[0m'
 
 log_err() {
-    echo "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $1" >&2
+    echo -e "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $1" >&2
+}
+log_notice() {
+    echo -e "${FONT_COLOR_GREEN}NOTICE${FONT_COLOR_END}: $1"
 }
 
 main() {
@@ -32,7 +36,15 @@ main() {
         return 1
     }
 
-    cd "$ANSIBLE_DIRECTORY" || {
+    [[ -z "$ANSIBLE_DIRECTORY_PATH" ]] && {
+        log_err "A variable ANSIBLE_DIRECTORY_PATH must not be empty."
+        return 1
+    }
+    [[ -z "$REQUIREMENTS_TXT_PATH" ]] && {
+        log_err "A variable REQUIREMENTS_TXT_PATH must not be empty."
+        return 1
+    }
+    cd "$ANSIBLE_DIRECTORY_PATH" || {
         log_err "Failed to change directory to $ANSIBLE_DIRECTORY"
         return 1
     }
@@ -48,7 +60,7 @@ main() {
     }
 
     #${ANSIBLE_DIRECTORY}/${PYTHON_VIRTUALENV_DIRECTORY}/bin/ansible-playbook --user ubuntu -i "$inventry_file" -l "$target" site.yml
-    ${ANSIBLE_DIRECTORY_PATH}/${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/ansible-playbook $@
+    ansible-playbook $@
 }
 
 activate_python_virtual_env() {
@@ -68,15 +80,23 @@ create_ansible_environment() {
     # Create symbolic link to cache packages of ansible-galaxy
     ln -s "${ANSIBLE_DIRECTORY}/.ansible" ~/.ansible
 
-    pip install -r "${REQUIREMENTS_TXT_PATH}" || {
-        log_err "Failed to install requirements with a command \"pip install -r ${REQUIREMENTS_TXT_PATH}\"."
-        return 1
-    }
+    if [[ ! -z "$REQUIREMENTS_TXT_PATH" ]]; then
+        pip install -r "${REQUIREMENTS_TXT_PATH}" || {
+            log_err "Failed to install requirements with a command \"pip install -r ${REQUIREMENTS_TXT_PATH}\"."
+            return 1
+        }
+    else
+        log_notice "A variable REQUIREMENTS_TXT_PATH is empty. Then installing dependencies of python has skipped."
+    fi
 
-    ansible-galaxy install -r "${REQUIREMENTS_YML_PATH}" || {
-        log_err "Failed to install requirements with a command \"ansible-galaxy install -r \"${REQUIREMENTS_YML_PATH}\"."
-        return 1
-    }
+    if [[ ! -z "$REQUIREMENTS_YML_PATH" ]];then
+        ansible-galaxy install -r "${REQUIREMENTS_YML_PATH}" || {
+            log_err "Failed to install requirements with a command \"ansible-galaxy install -r \"${REQUIREMENTS_YML_PATH}\"."
+            return 1
+        }
+    else
+        log_notice "A variable REQUIREMENTS_TXT_PATH is empty. Then installing dependencies of python has skipped."
+    fi
 
     return 0
 }
