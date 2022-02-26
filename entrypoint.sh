@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # A directory that an Ansible playbooks are located in.
-ANSIBLE_DIRECTORY_PATH="${ANSIBLE_DIRECTORY:-/opt/ansible}"
+ANSIBLE_DIRECTORY_PATH="${ANSIBLE_DIRECTORY_PATH:-/opt/ansible}"
 
 # A directory path that python venv will be installed.
-# It will be created under ANSIBLE_DIRECTORY if you specify relative path.
+# It will be created under ANSIBLE_DIRECTORY_PATH if you specify relative path.
 PYTHON_VIRTUALENV_DIRECTORY_PATH="${PYTHON_VIRTUALENV_DIRECTORY_PATH:-venv}"
 
 # A path of requirements.txt which information of requirement packages of python are in.
@@ -45,7 +45,7 @@ main() {
         return 1
     }
     cd "$ANSIBLE_DIRECTORY_PATH" || {
-        log_err "Failed to change directory to $ANSIBLE_DIRECTORY"
+        log_err "Failed to change directory to $ANSIBLE_DIRECTORY_PATH"
         return 1
     }
 
@@ -64,26 +64,27 @@ main() {
         return 1
     }
 
-    #${ANSIBLE_DIRECTORY}/${PYTHON_VIRTUALENV_DIRECTORY}/bin/ansible-playbook --user ubuntu -i "$inventry_file" -l "$target" site.yml
     ansible-playbook $@
 }
 
 activate_python_virtual_env() {
     # venv directory has already been prepared?
-    venv_has_already_prepared || {
+    if ! venv_has_already_prepared; then
         python3 -m "$PYTHON_VIRTUALENV_DIRECTORY_PATH" "${PYTHON_VIRTUALENV_DIRECTORY_PATH}/" || {
-            log_err "Failed to install python virtual env in $ANSIBLE_DIRECTORY"
+            log_err "Failed to install python virtual env in $ANSIBLE_DIRECTORY_PATH"
             return 1
         }
-        ${ANSIBLE_DIRECTORY}/${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/pip install --upgrade pip
-    }
-
-    source ${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/activate
+        source ${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/activate
+        pip install --upgrade pip
+    else
+        source ${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/activate
+    fi
+    return 0
 }
 
 create_ansible_environment() {
     # Create symbolic link to cache packages of ansible-galaxy
-    ln -s "${ANSIBLE_DIRECTORY}/.ansible" ~/.ansible
+    ln -s "${ANSIBLE_DIRECTORY_PATH}/.ansible" ~/.ansible
 
     if [[ ! -z "$REQUIREMENTS_TXT_PATH" ]]; then
         pip install -r "${REQUIREMENTS_TXT_PATH}" || {
