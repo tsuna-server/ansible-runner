@@ -49,6 +49,11 @@ main() {
         return 1
     }
 
+    activate_python_virtual_env || {
+        log_err "Failed to activate python venv"
+        return 1
+    }
+
     create_ansible_environment || {
         log_err "Failed to create Ansible environment"
         return 1
@@ -140,14 +145,16 @@ venv_has_already_prepared() {
 
     local result expected_parent_path
     result="$(which python)" || {
+        deactivate
         rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
         return 1
     }
     result="$(readlink $(dirname "$result"))"
     expected_parent_path=$(readlink "${ANSIBLE_DIRECTORY_PATH}")
 
-    [[ ! "$result" == "${expected_parent_path%/}/"* ]] || {
+    [[ "$result" == "${expected_parent_path%/}/"* ]] || {
         # Clear venv if it was created at other location.
+        deactivate
         rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
         return 1
     }
