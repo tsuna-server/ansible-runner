@@ -12,8 +12,11 @@ REQUIREMENTS_TXT_PATH="${REQUIREMENTS_TXT_PATH:-requirements.txt}"
 # A path of requirements.yml which information of requirement packages of ansible galaxy are in.
 REQUIREMENTS_YML_PATH="${REQUIREMENTS_YML_PATH:-requirements.yml}"
 
+FONT_COLOR_RED='\033[0;31m'
+FONT_COLOR_END='\033[0m'
+
 log_err() {
-    echo "ERROR: $1" >&2
+    echo "${FONT_COLOR_RED}ERROR${FONT_COLOR_END}: $1" >&2
 }
 
 main() {
