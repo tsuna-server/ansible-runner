@@ -108,6 +108,27 @@ EOF
 
 venv_has_already_prepared() {
     [ ! -d "${PYTHON_VIRTUALENV_DIRECTORY}" ] && return 1
+
+    source "${PYTHON_VIRTUALENV_DIRECTORY}/bin/activate" || {
+        # Delete venv directory and return flase if activation has failed.
+        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
+        return 1
+    }
+
+    local result expected_parent_path
+    result="$(which python)" || {
+        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
+        return 1
+    }
+    result="$(readlink $(dirname "$result"))"
+    expected_parent_path=$(readlink "${ANSIBLE_DIRECTORY_PATH}")
+
+    [[ ! "$result" == "${expected_parent_path%/}/"* ]] || {
+        # Clear venv if it was created at other location.
+        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
+        return 1
+    }
+
     return 0
 }
 
