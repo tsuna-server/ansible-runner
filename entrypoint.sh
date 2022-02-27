@@ -131,6 +131,7 @@ Host *
 EOF
     fi
 
+    chown -R root:root ~/.ssh
     chmod 700 ~/.ssh
     chmod -R 600 ~/.ssh/*
 }
