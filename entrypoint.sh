@@ -11,6 +11,8 @@ PYTHON_VIRTUALENV_DIRECTORY_PATH="${PYTHON_VIRTUALENV_DIRECTORY_PATH:-venv}"
 REQUIREMENTS_TXT_PATH="${REQUIREMENTS_TXT_PATH:-requirements.txt}"
 # A path of requirements.yml which information of requirement packages of ansible galaxy are in.
 REQUIREMENTS_YML_PATH="${REQUIREMENTS_YML_PATH:-requirements.yml}"
+# An option to run "ansible -m ping"
+RUNNER="${RUNNER:-ansible-playbook}"
 
 FONT_COLOR_RED='\033[0;31m'
 FONT_COLOR_GREEN='\033[0;32m'
@@ -32,6 +34,10 @@ main() {
         log_err "A variable REQUIREMENTS_TXT_PATH must not be empty."
         return 1
     }
+    if [[ ! "${RUNNER}" == "ansible-playbook" ]] && [[ ! "${RUNNER}" == "ansible" ]]; then
+        log_err "Unknown runner was detected[RUNNER=${RUNNER}]. The variable \"RUNNER\" should be \"ansible-playbook(by default)\" or \"ansible\"."
+        return 1
+    fi
     cd "$ANSIBLE_DIRECTORY_PATH" || {
         log_err "Failed to change directory to $ANSIBLE_DIRECTORY_PATH"
         return 1
@@ -52,7 +58,7 @@ main() {
         return 1
     }
 
-    ansible-playbook $@
+    $RUNNER $@
 }
 
 activate_python_virtual_env() {
