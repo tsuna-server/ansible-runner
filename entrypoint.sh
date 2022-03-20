@@ -24,18 +24,6 @@ log_notice() {
 }
 
 main() {
-    local inventry_file="$1"
-    local target="$2"
-
-    [[ -z "$inventry_file" ]] && {
-        log_err "This program requires inventry file."
-        return 1
-    }
-    [[ -z "$target" ]] && {
-        log_err "This program requires target host."
-        return 1
-    }
-
     [[ -z "$ANSIBLE_DIRECTORY_PATH" ]] && {
         log_err "A variable ANSIBLE_DIRECTORY_PATH must not be empty."
         return 1
