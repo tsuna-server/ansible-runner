@@ -6,6 +6,12 @@
 Here are some examples to run `ansible-runner`.
 These examples require you to prepare `ansible-playbook` directory that follows [Best Practices](https://docs.ansible.com/ansible/2.9/user_guide/playbooks_best_practices.html) of ansible-playbook on the host node.
 
+# Build
+
+```
+docker build -t tsutomu/tsuna-ansible-runner .
+```
+
 ## Run Ansible simply
 
 ```
