@@ -130,27 +130,28 @@ EOF
 }
 
 venv_has_already_prepared() {
-    [ ! -d "${PYTHON_VIRTUALENV_DIRECTORY}" ] && return 1
+    [ ! -d "${PYTHON_VIRTUALENV_DIRECTORY_PATH}" ] && return 1
 
-    source "${PYTHON_VIRTUALENV_DIRECTORY}/bin/activate" || {
+    # If version of python were difference, return the result as not prepared.
+    local current_python_version="$(python --version | cut -d ' ' -f 2)"
+    local venv_python_version="$(${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/python --version | cut -d ' ' -f 2)"
+    [ ! "$current_python_version" = "$venv_python_version" ] && {
+        echo "Versions are not same[current_python_version=${current_python_version}, venv_python_version=${venv_python_version}]"
+        rm -rf "${PYTHON_VIRTUALENV_DIRECTORY_PATH}"
+        return 1
+    }
+
+    source "${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/activate" || {
         # Delete venv directory and return flase if activation has failed.
-        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
+        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY_PATH"
         return 1
     }
 
-    local result expected_parent_path
-    result="$(which python)" || {
+    local result_of_which_python expected_parent_path
+    result_of_which_python="$(which python)" || {
+        # Activation has succeeded but command was not found.
         deactivate
-        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
-        return 1
-    }
-    result="$(readlink $(dirname "$result"))"
-    expected_parent_path=$(readlink "${ANSIBLE_DIRECTORY_PATH}")
-
-    [[ "$result" == "${expected_parent_path%/}/"* ]] || {
-        # Clear venv if it was created at other location.
-        deactivate
-        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY"
+        rm -rf "$PYTHON_VIRTUALENV_DIRECTORY_PATH"
         return 1
     }
 
