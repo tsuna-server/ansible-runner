@@ -134,7 +134,7 @@ venv_has_already_prepared() {
 
     # If version of python were difference, return the result as not prepared.
     local current_python_version="$(python --version | cut -d ' ' -f 2)"
-    local venv_python_version="$(${PYTHON_VIRTUALENV_DIRECTORY_PATH}/bin/python --version | cut -d ' ' -f 2)"
+    local venv_python_version="$(grep -P '^version *= *' ${PYTHON_VIRTUALENV_DIRECTORY_PATH}/pyvenv.cfg | sed -e 's/^version *= *\(.*\)/\1/g')"
     [ ! "$current_python_version" = "$venv_python_version" ] && {
         echo "Versions are not same[current_python_version=${current_python_version}, venv_python_version=${venv_python_version}]"
         rm -rf "${PYTHON_VIRTUALENV_DIRECTORY_PATH}"
