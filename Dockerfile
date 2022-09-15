@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+#FROM ubuntu:22.04
+FROM python:3.10-buster
 LABEL maintainer "Tsutomu Nakamura<tsuna.0x00@gmail.com>"
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
