@@ -18,6 +18,7 @@ docker build -t tsutomu/tsuna-ansible-runner .
 $ docker run --rm \
     --add-host target-host01:192.168.0.11 \
     --volume /path/to/ansible-playbook:/opt/ansible \
+    -e ANSIBLE_HOST_KEY_CHECKING=false \
     -ti tsutomu/ansible-runner -u operator -l production -i target-host01 -k site.yml
 ```
 It assumes that the `/path/to/ansible-playbook` on the host is a root of the ansible-playbook that follows the [Directory Layout](https://docs.ansible.com/ansible/2.9/user_guide/playbooks_best_practices.html#directory-layout).
@@ -32,6 +33,7 @@ $ docker run --rm \
     --add-host target-host02:192.168.0.12 \
     --volume ${PWD}:/opt/ansible \
     --volume /path/to/ssh-private-key.pem:/private-key \
+    -e ANSIBLE_HOST_KEY_CHECKING=false \
     -ti tsutomu/ansible-runner -u operator -l production -i target-host01:target-host02 site.yml
 ```
 This command will use `/path/to/ssh-private-key.pem` to login to hosts `target-host01` and `target-host02`.
@@ -44,8 +46,13 @@ $ docker run --rm \
     --add-host target-host02:192.168.0.12 \
     --volume ${PWD}:/opt/ansible \
     --volume /path/to/.ssh:/.ssh \
+    -e ANSIBLE_HOST_KEY_CHECKING=false \
     -ti tsutomu/ansible-runner -u operator -l production -i target-host01:target-host02 site.yml
 ```
 This command will use ssh private-keys and configurations in a directory `/path/to/.ssh` on the host.
 You can control detailed which private-keys should be used to each hosts to connect by declaring configurations in `.ssh/config`.
 
+## Upgrade requirements.txt
+```
+$ docker run --rm --volume ${PWD}:/opt/ansible -ti tsutomu/tsuna-ansible-runner update-requirements-txt
+```
