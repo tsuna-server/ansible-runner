@@ -26,6 +26,14 @@ log_notice() {
 }
 
 main() {
+    [ "$#" -eq 1 ] && [ "update-requirements-txt" = "$1" ] && {
+        update_requirements_txt || {
+            log_err "Failed to update requirements.txt due to previous error."
+            return 1
+        }
+        return 0
+    }
+
     [[ -z "$ANSIBLE_DIRECTORY_PATH" ]] && {
         log_err "A variable ANSIBLE_DIRECTORY_PATH must not be empty."
         return 1
@@ -60,6 +68,46 @@ main() {
 
     $RUNNER $@
 }
+
+update_requirements_txt() {
+    log_notice "Updating requirements.txt in \"${ANSIBLE_DIRECTORY_PATH}\" on the container."
+
+    cd "${ANSIBLE_DIRECTORY_PATH}" || {
+        log_err "An Ansible directory \"${ANSIBLE_DIRECTORY_PATH}\" was not existed."
+        return 1
+    }
+
+    [ ! -d requirements.txt ] || {
+        log_err "requirements.txt was not existed in a directory \"${ANSIBLE_DIRECTORY_PATH}\"."
+        return 1
+    }
+
+    rm -rf venv/
+    python -m venv venv/ || {
+        log_err "Failed to create python virtual env at \"${ANSIBLE_DIRECTORY_PATH}/venv/\""
+        return 1
+    }
+
+    source venv/bin/activate
+    pip install --upgrade pip || {
+        log_err "Failed to upgrade pip by the command \"pip install --upgrade pip\"."
+        return 1
+    }
+
+    pip install pip-upgrader || {
+        log_err "Failed to install pip-upgrader by the command \"pip install pip-upgrader\"."
+        return 1
+    }
+
+    pip-upgrade requirements.txt || {
+        log_err "Failed to upgrade requirements.txt by the command \"pip-upgrade requirements.txt\"."
+        return 1
+    }
+
+    log_notice "Succeeded in updating requirements.txt in \"${ANSIBLE_DIRECTORY_PATH}\" on the container."
+    return 0
+}
+
 
 activate_python_virtual_env() {
     # venv directory has already been prepared?
