@@ -1,5 +1,5 @@
 #FROM ubuntu:22.04
-FROM python:3.11-bullseye
+FROM python:3.11.5-bullseye
 LABEL maintainer "Tsutomu Nakamura<tsuna.0x00@gmail.com>"
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
