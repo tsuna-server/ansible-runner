@@ -137,7 +137,7 @@ create_ansible_environment() {
         log_notice "A variable REQUIREMENTS_TXT_PATH is empty. Then installing dependencies of python has skipped."
     fi
 
-    if [[ ! -z "$REQUIREMENTS_YML_PATH" ]];then
+    if [[ -f "$REQUIREMENTS_YML_PATH" ]] && [[ ! -z "$REQUIREMENTS_YML_PATH" ]];then
         ansible-galaxy install -r "${REQUIREMENTS_YML_PATH}" || {
             log_err "Failed to install requirements with a command \"ansible-galaxy install -r \"${REQUIREMENTS_YML_PATH}\"."
             return 1
