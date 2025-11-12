@@ -151,9 +151,14 @@ create_ansible_environment() {
 
 prepare_ssh_key() {
     # Copy .ssh directory if /.ssh directory is already existed.
-    if [ -d /.ssh ]; then
+    if [ -d /root/.ssh ]; then
+        log_notice "/root/.ssh directory is already existed. Then skipping to prepare ssh keys."
+        return
+    elif [ -d /.ssh ]; then
+        log_notice "/.ssh directory is existed. Then copying it to /root/.ssh"
         cp -a /.ssh /root/.ssh
     elif [ -f "/private-key" ]; then
+        log_notice "/private-key file is existed. Then creating /root/.ssh directory and copying the private key file to it."
         mkdir ~/.ssh
         cp /private-key ~/.ssh/private-key || {
             log_err "Failed to copy /private-key to user's ssh config directory"
